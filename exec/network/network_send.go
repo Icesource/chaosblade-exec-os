@@ -185,13 +185,13 @@ func (nse *NetworkSendExecutor) start(ctx context.Context, ip string, port strin
 	} else {
 		intervalMs = int(float64(duration) / float64(quantity) * 1000)
 	}
-	if sendType != tc.Delay {
-		msg = generateHandShakeMsg()
-	} else {
-		msg = generateTimeStampMsg()
-	}
 
 	for i := 0; i < quantity; i++ {
+		if sendType != tc.Delay {
+			msg = generateHandShakeMsg()
+		} else {
+			msg = generateTimeStampMsg()
+		}
 		if tcpClient.Send(ctx, msg) {
 			count++
 		}
