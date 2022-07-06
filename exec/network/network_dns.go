@@ -23,6 +23,7 @@ import (
 	"github.com/chaosblade-io/chaosblade-exec-os/exec/network/tc"
 	"github.com/chaosblade-io/chaosblade-spec-go/log"
 	"github.com/chaosblade-io/chaosblade-spec-go/spec"
+	"strings"
 )
 
 type DnsActionSpec struct {
@@ -136,11 +137,16 @@ func (ns *NetworkDnsExecutor) stop(ctx context.Context, domain, ip string) *spec
 }
 
 func (ns *NetworkDnsExecutor) verify(ctx context.Context, domain, ip string) *spec.Response {
-	response := ns.channel.Run(ctx, "ping", fmt.Sprintf(`%s -c 1 | grep -q "(%s)"`, domain, ip))
+	response := ns.channel.Run(ctx, "ping", fmt.Sprintf(`%s -c 1 | head -n 1 | awk '{print$3}' | sed 's/(\(.*\)).*/\1/g'`, domain))
 	if !response.Success {
-		return spec.ResponseFailWithFlags(spec.DnsSelfVerifyFailed, domain, ip)
+		return spec.ResponseFailWithFlags(spec.OsCmdExecFailed, "ping", response.Err)
 	}
-	return spec.Success()
+	solvedIp := strings.TrimSpace(response.Result.(string))
+	if ip != solvedIp {
+		return spec.ReturnFail(spec.DnsSelfVerifyFailed, solvedIp)
+	} else {
+		return spec.ReturnSuccess(solvedIp)
+	}
 }
 
 func (ns *NetworkDnsExecutor) SetChannel(channel spec.Channel) {
