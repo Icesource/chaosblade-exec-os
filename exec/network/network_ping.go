@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/chaosblade-io/chaosblade-exec-os/exec/category"
 	"github.com/chaosblade-io/chaosblade-exec-os/exec/network/tc"
@@ -294,8 +293,7 @@ func (npe *NetworkPingExecutor) onDelay(ctx context.Context, params *PingParams)
 
 	averageDelay := float64(delayCount) / float64(params.quantity)
 	if checkPercent(averageDelay, params.expectedDelay, params.tolerance) {
-		delayJson, _ := json.Marshal(map[string]float64{"averageDelay": averageDelay})
-		return spec.ReturnSuccess(string(delayJson))
+		return spec.ReturnSuccess(fmt.Sprintf("%.2f", averageDelay))
 	} else {
 		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType, fmt.Sprintf("%d", params.expectedDelay), fmt.Sprintf("%.2f", averageDelay))
 	}
@@ -311,8 +309,7 @@ func (npe *NetworkPingExecutor) onDuplicate(ctx context.Context, params *PingPar
 	duplicate, _ := strconv.Atoi(strings.TrimSpace(response.Result.(string)))
 	duplicatePercent := float64(duplicate) * 100 / float64(params.quantity)
 	if checkPercent(duplicatePercent, params.expectedPercent, params.tolerance) {
-		duplicateJson, _ := json.Marshal(map[string]float64{"duplicatePercent": duplicatePercent})
-		return spec.ReturnSuccess(string(duplicateJson))
+		return spec.ReturnSuccess(fmt.Sprintf("%.2f", duplicatePercent))
 	} else {
 		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType, fmt.Sprintf("%d", params.expectedPercent), fmt.Sprintf("%.2f", duplicatePercent))
 	}
@@ -344,8 +341,7 @@ func (npe *NetworkPingExecutor) onReorder(ctx context.Context, params *PingParam
 
 	reorderPercent := float64(reorderPacketCount) * 100 / float64(params.quantity)
 	if checkPercent(reorderPercent, params.expectedPercent, params.tolerance) {
-		reorderJson, _ := json.Marshal(map[string]float64{"reorderPercent": reorderPercent})
-		return spec.ReturnSuccess(string(reorderJson))
+		return spec.ReturnSuccess(fmt.Sprintf("%.2f", reorderPercent))
 	} else {
 		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
 			fmt.Sprintf("%d", params.expectedPercent), fmt.Sprintf("%.2f", reorderPercent))
@@ -365,8 +361,7 @@ func (npe *NetworkPingExecutor) onCorrupt(ctx context.Context, params *PingParam
 	} else {
 		corruptPercent := float64(params.quantity-receivedPacketCount) * 100 / float64(params.quantity)
 		if checkPercent(corruptPercent, params.expectedPercent, params.tolerance) {
-			corruptJson, _ := json.Marshal(map[string]float64{"corruptPercent": corruptPercent})
-			return spec.ReturnSuccess(string(corruptJson))
+			return spec.ReturnSuccess(fmt.Sprintf("%.2f", corruptPercent))
 		} else {
 			return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
 				fmt.Sprintf("%d", params.expectedPercent), fmt.Sprintf("%.2f", corruptPercent))
@@ -389,8 +384,7 @@ func (npe *NetworkPingExecutor) onLoss(ctx context.Context, params *PingParams) 
 	}
 	lossPercent, _ := strconv.ParseFloat(strings.TrimSpace(lossStr), 64)
 	if checkPercent(lossPercent, params.expectedPercent, params.tolerance) {
-		lossJson, _ := json.Marshal(map[string]float64{"lossPercent": lossPercent})
-		return spec.ReturnSuccess(string(lossJson))
+		return spec.ReturnSuccess(fmt.Sprintf("%.2f", lossPercent))
 	} else {
 		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
 			fmt.Sprintf("%d", params.expectedPercent), fmt.Sprintf("%.2f", lossPercent))
