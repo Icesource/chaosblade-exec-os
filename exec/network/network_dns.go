@@ -143,10 +143,12 @@ func (ns *NetworkDnsExecutor) verify(ctx context.Context, domain, ip string) *sp
 	}
 	solvedIp := strings.TrimSpace(response.Result.(string))
 	if ip != solvedIp {
-		return spec.ReturnFail(spec.DnsSelfVerifyFailed, solvedIp)
+		response = spec.ReturnFail(spec.DnsSelfVerifyFailed, solvedIp)
 	} else {
-		return spec.ReturnSuccess(solvedIp)
+		response = spec.ReturnSuccess(solvedIp)
 	}
+	response.Result = fmt.Sprintf("%s", solvedIp)
+	return response
 }
 
 func (ns *NetworkDnsExecutor) SetChannel(channel spec.Channel) {

@@ -295,7 +295,10 @@ func (npe *NetworkPingExecutor) onDelay(ctx context.Context, params *PingParams)
 	if checkPercent(averageDelay, params.expectedDelay, params.tolerance) {
 		return spec.ReturnSuccess(fmt.Sprintf("%.2f", averageDelay))
 	} else {
-		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType, fmt.Sprintf("%d", params.expectedDelay), fmt.Sprintf("%.2f", averageDelay))
+		response = spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
+			fmt.Sprintf("%d", params.expectedDelay), fmt.Sprintf("%.2f", averageDelay))
+		response.Result = fmt.Sprintf("%.2f", averageDelay)
+		return response
 	}
 }
 
@@ -386,7 +389,9 @@ func (npe *NetworkPingExecutor) onLoss(ctx context.Context, params *PingParams) 
 	if checkPercent(lossPercent, params.expectedPercent, params.tolerance) {
 		return spec.ReturnSuccess(fmt.Sprintf("%.2f", lossPercent))
 	} else {
-		return spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
+		response = spec.ResponseFailWithFlags(spec.PingSelfVerifyFailed, params.experimentType,
 			fmt.Sprintf("%d", params.expectedPercent), fmt.Sprintf("%.2f", lossPercent))
+		response.Result = fmt.Sprintf("%.2f", lossPercent)
+		return response
 	}
 }
